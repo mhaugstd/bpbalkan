@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wien → Balkan → Ljubljana — 10 land</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #1a1a18; --ink2: #3d3d38; --muted: #7a7a72;
+    --faint: #f2f0eb; --faint2: #e8e5de; --accent: #c45e2a;
+    --border: #d4d0c8; --white: #faf9f6;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--ink); font-size: 15px; line-height: 1.6; }
+
+  .hero { background: var(--ink); color: var(--white); padding: 80px 40px 60px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 80px); }
+  .hero-inner { max-width: 880px; margin: 0 auto; position: relative; }
+  .hero-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(36px, 6vw, 68px); font-weight: 900; line-height: 1.05; margin-bottom: 24px; letter-spacing: -0.02em; }
+  .hero h1 span { color: var(--accent); }
+  .hero-sub { font-size: 16px; color: rgba(255,255,255,0.5); font-weight: 300; max-width: 520px; margin-bottom: 40px; }
+  .countries-strip { display: flex; flex-wrap: wrap; gap: 8px; }
+  .c-pill { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 100px; padding: 5px 14px; font-size: 12px; color: rgba(255,255,255,0.75); white-space: nowrap; }
+  .c-pill.hi { background: rgba(196,94,42,0.2); border-color: rgba(196,94,42,0.4); color: #e8987a; }
+
+  .stats-bar { background: var(--faint); border-bottom: 1px solid var(--border); padding: 0 40px; }
+  .stats-inner { max-width: 880px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); }
+  .stat-item { padding: 24px 20px; border-right: 1px solid var(--border); }
+  .stat-item:first-child { padding-left: 0; }
+  .stat-item:last-child { border-right: none; }
+  .stat-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .stat-value { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--ink); line-height: 1; }
+  .stat-unit { font-size: 13px; font-weight: 400; color: var(--muted); }
+
+  main { max-width: 880px; margin: 0 auto; padding: 60px 40px; }
+
+  .section-head { display: flex; align-items: center; gap: 16px; margin: 56px 0 20px; }
+  .section-head:first-of-type { margin-top: 0; }
+  .section-flag { font-size: 18px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+  .section-line { flex: 1; height: 1px; background: var(--border); }
+
+  .day-card { border: 1px solid var(--border); border-radius: 6px; margin-bottom: 14px; overflow: hidden; transition: box-shadow 0.2s; }
+  .day-card:hover { box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+  .day-header { display: grid; grid-template-columns: 64px 1fr; cursor: pointer; }
+  .day-date { background: var(--faint); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 18px 8px; text-align: center; }
+  .day-date .dd { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; line-height: 1; }
+  .day-date .mo { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+  .day-body { padding: 16px 20px 14px; }
+  .day-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .day-stage { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: var(--ink); line-height: 1.25; }
+  .day-meta { display: flex; gap: 5px; align-items: center; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+  .chip { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 100px; white-space: nowrap; }
+  .c-km { background: #e8e5de; color: var(--ink2); }
+  .c-hm { background: #faeee6; color: #8b3a15; }
+  .c-time { background: #e2eee6; color: #1a4f38; }
+  .c-flat { background: #e4edf8; color: #1a3d6b; }
+  .c-mountain { background: #faeee6; color: #8b3a15; }
+  .c-coast { background: #e0f0ee; color: #0e4a42; }
+  .c-new { background: #fdf0e0; color: #7a4508; }
+  .c-stars { background: transparent; color: var(--muted); font-size: 12px; padding: 3px 0; }
+  .day-tip { font-size: 13px; color: var(--muted); line-height: 1.55; border-left: 2px solid var(--faint2); padding-left: 12px; margin-bottom: 12px; }
+  .toggle-btn { font-size: 11px; color: var(--accent); cursor: pointer; font-weight: 500; letter-spacing: 0.04em; display: inline-flex; align-items: center; gap: 5px; background: none; border: none; padding: 0; font-family: inherit; }
+  .toggle-btn::after { content: '↓'; transition: transform 0.2s; }
+  .day-card.open .toggle-btn::after { transform: rotate(180deg); }
+
+  .day-details { border-top: 1px solid var(--faint2); padding: 16px 20px 18px; display: none; }
+  .day-card.open .day-details { display: block; }
+  .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .detail-box { background: var(--faint); border-radius: 4px; padding: 14px 16px; }
+  .detail-box-title { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .highlight-list { list-style: none; }
+  .highlight-list li { font-size: 13px; color: var(--ink2); padding: 5px 0; display: flex; gap: 8px; align-items: flex-start; line-height: 1.4; border-bottom: 1px solid var(--faint2); }
+  .highlight-list li:last-child { border-bottom: none; }
+  .highlight-list li::before { content: '→'; color: var(--accent); font-size: 11px; margin-top: 2px; flex-shrink: 0; }
+
+  .midway-box { background: linear-gradient(135deg, #f5f0e8, #ede8df); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; margin-top: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .midway-pin { font-size: 22px; flex-shrink: 0; }
+  .midway-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .midway-name { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .midway-desc { font-size: 12px; color: var(--muted); line-height: 1.55; }
+  .midway-km { display: inline-block; font-size: 11px; background: rgba(196,94,42,0.12); color: var(--accent); border-radius: 100px; padding: 2px 10px; margin-top: 8px; font-weight: 500; }
+
+  .rest-card { display: grid; grid-template-columns: 64px 1fr; border: 1px dashed var(--border); border-radius: 6px; margin-bottom: 14px; overflow: hidden; background: var(--faint); }
+  .rest-date { border-right: 1px dashed var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 14px 8px; text-align: center; }
+  .rest-date .dd { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--muted); line-height: 1; }
+  .rest-date .mo { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--border); margin-top: 2px; }
+  .rest-body { padding: 14px 20px; display: flex; align-items: center; gap: 14px; }
+  .rest-icon { font-size: 24px; }
+  .rest-title { font-size: 14px; font-weight: 500; color: var(--ink2); }
+  .rest-sub { font-size: 12px; color: var(--muted); }
+
+  .home-card { background: var(--ink); color: var(--white); border-radius: 6px; padding: 22px 24px; display: flex; align-items: center; gap: 20px; margin-top: 14px; }
+  .home-date-block .dd { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; line-height: 1; color: var(--accent); }
+  .home-date-block .mo { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.4); }
+  .home-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.15); }
+  .home-text .title { font-size: 15px; font-weight: 500; }
+  .home-text .sub { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 3px; }
+
+  footer { border-top: 1px solid var(--border); padding: 32px 40px; text-align: center; font-size: 12px; color: var(--muted); }
+
+  @media (max-width: 640px) {
+    .hero { padding: 48px 20px 40px; }
+    .stats-bar { padding: 0 20px; }
+    .stats-inner { grid-template-columns: repeat(3, 1fr); }
+    .stat-item:nth-child(3) { border-right: none; }
+    .stat-item:nth-child(4), .stat-item:nth-child(5) { border-top: 1px solid var(--border); }
+    .stat-item:nth-child(5) { border-right: none; }
+    main { padding: 36px 20px; }
+    .day-top { flex-direction: column; gap: 8px; }
+    .day-meta { justify-content: flex-start; }
+    .details-grid { grid-template-columns: 1fr; }
+    footer { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <p class="hero-eyebrow">Bikepacking 2025</p>
+    <h1>Wien → Balkan<br><span>→ Ljubljana</span></h1>
+    <p class="hero-sub">19. juli – 5. august 2025 · 18 dager gjennom 10 land</p>
+    <div class="countries-strip">
+      <span class="c-pill">🇦🇹 Østerrike</span>
+      <span class="c-pill">🇨🇿 Tsjekkia</span>
+      <span class="c-pill">🇸🇰 Slovakia</span>
+      <span class="c-pill">🇭🇺 Ungarn</span>
+      <span class="c-pill hi">🇷🇴 Romania ★</span>
+      <span class="c-pill">🇭🇷 Kroatia</span>
+      <span class="c-pill">🇧🇦 Bosnia</span>
+      <span class="c-pill">🇮🇹 Italia</span>
+      <span class="c-pill">🇸🇮 Slovenia</span>
+    </div>
+  </div>
+</header>
+
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat-item"><div class="stat-label">Distanse</div><div class="stat-value">~1 970 <span class="stat-unit">km</span></div></div>
+    <div class="stat-item"><div class="stat-label">Høydemeter</div><div class="stat-value">~10 500 <span class="stat-unit">m</span></div></div>
+    <div class="stat-item"><div class="stat-label">Sykledager</div><div class="stat-value">15 <span class="stat-unit">dager</span></div></div>
+    <div class="stat-item"><div class="stat-label">Snittfart</div><div class="stat-value">25 <span class="stat-unit">km/t</span></div></div>
+    <div class="stat-item"><div class="stat-label">Land</div><div class="stat-value">10</div></div>
+  </div>
+</div>
+
+<main>
+
+<div class="section-head">
+  <span class="section-flag">🇦🇹🇨🇿🇸🇰🇭🇺</span>
+  <span class="section-title">Pannonia-sletten</span>
+  <div class="section-line"></div>
+</div>
+
+<div class="rest-card">
+  <div class="rest-date"><div class="dd">19</div><div class="mo">jul</div></div>
+  <div class="rest-body"><div class="rest-icon">🔧</div><div><div class="rest-title">Klargjøring — Wien</div><div class="rest-sub">Monter utstyr, testride 10–15 km, last ned offline kart</div></div></div>
+</div>
+
+<div class="day-card" id="d1">
+  <div class="day-header" onclick="toggle('d1')">
+    <div class="day-date"><div class="dd">20</div><div class="mo">jul</div></div>
+    <div class="day-body">
+      <div class="day-top">
+        <div class="day-stage">Wien → Mikulov</div>
+        <div class="day-meta">
+          <span class="chip c-km">140 km</span><span class="chip c-hm">↑ 220 m</span><span class="chip c-time">⏱ 5t 36m</span><span class="chip c-flat">flatt</span><span class="chip c-new">🇨🇿 CZ ★</span><span class="chip c-stars">⭐⭐</span>
+        </div>
+      </div>
+      <p class="day-tip">EuroVelo 9, sving øst og ned langs March-elven (Morava). Marchegg, Hohenau, Bernhardsthal — bilfri natursti hele veien til Mikulov. Middelalderslott over vinstockene.</p>
+      <button class="toggle-btn">Høydepunkter og midtstopp</button>
+    </div>
+  </div>
+  <div class="day-details">
+    <div class="details-grid">
+      <div class="detail-box">
+        <div class="detail-box-title">Høydepunkter</div>
+        <ul class="highlight-list">
+          <li>March-elven (Morava) — bilfri sykkelsti langs elvebredden hele veien</li>
+          <li>Marchegg — middelalderby med slott og naturreservat ved elven</li>
+          <li>Grense AT → CZ — pittoresk landgrense gjennom vinmarker</li>
+          <li>Mikulov slott — dominerer bybildet fra klippetoppen, utsikt over Pálava-regionen</li>
+          <li>Pálava-vinregionen — stopp og smak lokal Moravian Riesling</li>
+        </ul>
+      </div>
+      <div class="detail-box">
+        <div class="detail-box-title">Praktisk</div>
+        <ul class="highlight-list">
+          <li>Første dag med full last — ikke stress, March-elven er enkel og flat</li>
+          <li>To grenser (AT→CZ→SK) — pass tilgjengelig, normalt rask passering</li>
+          <li>Ingen store byer underveis — ta med nok vann og mat fra Wien</li>
+          <li>Mikulov: kveldstur opp til slottet før solnedgang er spektakulær</li>
+        </ul>
+      </div>
+    </div>
+    <div class="midway-box">
+      <div class="midway-pin">📍</div>
+      <div>
+        <div class="midway-label">Anbefalt midtstopp</div>
+        <div class="midway-name">Hohenau an der March</div>
+        <div class="midway-desc">Liten østerriksk grenseby ved March-elven. Supermarked, kafé og fine rasteplasser langs elven. Perfekt for lunsj og påfyll av vann og mat før de siste 45 km inn i Tsjekkia.</div>
+        <span class="midway-km">~km 75</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="day-card" id="d2">
+  <div class="day-header" onclick="toggle('d2')">
+    <div class="day-date"><div class="dd">21</div><div class="mo">jul</div></div>
+    <div class="day-body">
+      <div class="day-top">
+        <div class="day-stage">Mikulov → Bratislava → Komárno</div>
+        <div class="day-meta">
+          <span class="chip c-km">160 km</span><span class="chip c-hm">↑ 280 m</span><span class="chip c-time">⏱ 6t 24m</span><span class="chip c-flat">flatt</span><span class="chip c-new">🇸🇰 SK lunsj</span><span class="chip c-stars">⭐⭐</span>
+        </div>
+      </div>
+      <p class="day-tip">March-elven videre til Bratislava (lunsj, gamlebyen), EuroVelo 6 langs Donau sørøstover. Slovakia–Ungarn bro ved Komárno.</p>
+      <button class="toggle-btn">Høydepunkter og midtstopp</button>
+    </div>
+  </div>
+  <div class="day-details">
+    <div class="details-grid">
+      <div class="detail-box">
+        <div class="detail-box-title">Høydepunkter</div>
+        <ul class="highlight-list">
+          <li>Bratislava gamlebyen — kompakt og sjarmerende, lett å utforske</li>
+          <li>Bratislava slott — utsikt over Donau og tre lands grenser (SK/AT/HU)</li>
+          <li>EuroVelo 6 langs Donau — vakkert elvelandskap sørøstover</li>
+          <li>Komárno — by delt mellom Slovakia og Ungarn av Donau, dobbelby-atmosfære</li>
+        </ul>
+      </div>
+      <div class="detail-box">
+        <div class="detail-box-title">Praktisk</div>
+        <ul class="highlight-list">
+          <li>Bratislava: 45–60 min i gamlebyen — ikke lenger, lang dag venter</li>
+          <li>Grense SK → HU ved Komárno-broen — Schengen, normalt ingen stopp</li>
+          <li>Veksle til ungarsk forint (HUF) — minibank i Komárno</li>
+          <li>Overnatting i Komárno sentrum — billig og hyggelig</li>
+        </ul>
+      </div>
+    </div>
+    <div class="midway-box">
+      <div class="midway-pin">📍</div>
+      <div>
+        <div class="midway-label">Anbefalt midtstopp</div>
+        <div class="midway-name">Bratislava — Staré Mesto</div>
+        <div class="midway-desc">Lunsj i gamlebyen ved Hlavné námestie (hovedtorget). Mange gode kafeer og restauranter. Gå opp til slottet for utsikten — 10 min gange, absolutt verdt det. Slovakia i boks!</div>
+        <span class="midway-km">~km 80</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="day-card" id="d3">
+  <div class="day-header" onclick="toggle('d3')">
+    <div class="day-date"><div class="dd">22</div><div class="mo">jul</div></div>
+    <div class="day-body">
+      <div class="day-top">
+        <div class="day-stage">Komárno → Budapest</div>
+        <div class="day-meta">
+          <span class="chip c-km">150 km</span><span class="chip c-hm">↑ 450 m</span><span class="chip c-time">⏱ 6t 00m</span><span class="chip c-flat">flatt</span><span class="chip c-stars">⭐⭐</span>
+        </div>
+      </div>
+      <p class="day-tip">EuroVelo 6 langs Donauknekkbuen — Esztergom-katedralen, Visegrád-slottet, Szentendre. Turens vakreste Donau-strekk.</p>
+      <button class="toggle-btn">Høydepunkter og midtstopp</button>
+    </div>
+  </div>
+  <div class="day-details">
+    <div class="details-grid">
+      <div class="detail-box">
+        <div class="detail-box-title">Høydepunkter</div>
+        <ul class="highlight-list">
+          <li>Esztergom-basilikaen — Ungarns største katedral troner over Donau</li>
+          <li>Donauknekkbuen — der elven svinger 90° sørover, dramatisk landskap</li>
+          <li>Visegrád-slottet — middelalderruiner med panorama over knekkbuen</li>
+          <li>Szentendre — kunstnerby med serbisk-ortodokse kirker og gallerier</li>
+          <li>Budapest — ankomst langs Donau med parlamentsbygningen i horisonten</li>
+        </ul>
+      </div>
+      <div class="detail-box">
+        <div class="detail-box-title">Praktisk</div>
+        <ul class="highlight-list">
+          <li>En av turens vakreste etapper — ta deg tid til Esztergom</li>
+          <li>Visegrád: kort bakke opp til slottet, svært verdt det</li>
+          <li>Budapest: book overnatting på forhånd (høysesong juli)</li>
+          <li>Kveldstur langs Donau-promenaden — parlamentet er best etter solnedgang</li>
+        </ul>
+      </div>
+    </div>
+    <div class="midway-box">
+      <div class="midway-pin">📍</div>
+      <div>
+        <div class="midway-label">Anbefalt midtstopp</div>
+        <div class="midway-name">Esztergom</div>
+        <div class="midway-desc">Stopp ved basilikaen og gå opp til krypten og kupolen (gratis). Lunsj i gamlebyen nedenfor — Prímás Pince er en klassiker. Utsikten over Donau og Slovakia på andre siden er spektakulær.</div>
+        <span class="midway-km">~km 70</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-head">
+  <span class="section-flag">🇭🇺🇷🇴</span>
+  <span class="section-title">Romania-loopen</span>
+  <div class="section-line"></div>
+</div>
+
+<div class="day-card" id="d4">
+  <div class="day-header" onclick="toggle('d4')">
+    <div class="day-date"><div class="dd">23</div><div class="mo">jul</div></div>
+    <div class="day-body">
+      <div class="day-top">
+        <div class="day-stage">Budapest → Nădlac (RO) → Szeged</div>
+        <div class="day-meta">
+          <span class="chip c-km">160 km</span><span class="chip c-hm">↑ 200 m</span><span class="chip c-time">⏱ 6t 24m</span><span class="chip c-flat">flatt</span><span class="chip c-new">🇷🇴 RO ★ loop</span><span class="chip c-stars">⭐⭐⭐</span>
+        </div>
+      </div>
+      <p class="day-tip">Sørøstover mot grensen ved Nagylak/Nădlac. Pip inn i Romania, kaffestopp, snu og vestover til Szeged langs Tisza-elven. Flat pusta hele veien.</p>
+      <button class="toggle-btn">Høydepunkter og midtstopp</button>
+    </div>
+  </div>
+  <div class="day-details">
+    <div class="details-grid">
+      <div class="detail-box">
+        <div class="detail-box-title">Høydepunkter</div>
+        <ul class="highlight-list">
+          <li>Grense HU → RO — Romania er ikke Schengen, skikkelig stempel i passet!</li>
+          <li>Nădlac — liten rumensk grenseby, kaffestopp og land nummer 10 i boks</li>
+          <li>Tisza-elven — rolig elvelandskap tilbake mot Szeged</li>
+          <li>Szeged — Ungarns solrikeste by, vakker art nouveau-arkitektur</li>
+          <li>Szeged-katedralen — mektig neoromansk katedral ved Dóm tér</li>
+        </ul>
+      </div>
+      <div class="detail-box">
+        <div class="detail-box-title">Praktisk</div>
+        <ul class="highlight-list">
+          <li>Romania ikke Schengen — pass obligatorisk, kan ta 15–30 min i kø</li>
+          <li>Ta med noen euro eller rumenske lei (RON) til kaffebesøket</li>
+          <li>Lang flat dag — sjekk vindprognose kvelden før</li>
+          <li>Szeged: Halászlé (fiskesuppe) er byens spesialitet — ikke gå glipp!</li>
+        </ul>
+      </div>
+    </div>
+    <div class="midway-box">
+      <div class="midway-pin">📍</div>
+      <div>
+        <div class="midway-label">Anbefalt midtstopp</div>
+        <div class="midway-name">Nădlac, Romania</div>
+        <div class="midway-desc">Selve poenget med dagen! Ta en kaffe, pass på passstempelet, ta bilde ved grenseskiltet — 10 land! Rumenske strudel er overraskende god. Nyt øyeblikket, dette er episk.</div>
+        <span class="midway-km">~km 130 (snupunkt)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="day-card" id="d5">
+  <div class="day-header" onclick="toggle('d5')">
+    <div class="day-date"><div class="dd">24</div><div class="mo">jul</div></div>
+    <div class="day-body">
+      <div class="day-top">
+        <div class="day-stage">Szeged → Mohács</div>
+        <div class="day-meta">
+          <span class="chip c-km">140 km</span><span class="chip c-hm">↑ 180 m</span><span class="chip c-time">⏱ 5t 36m</span><span class="chip c-flat">flatt</span><span class="chip c-stars">⭐⭐</span>
+        </div>
+      </div>
+      <p class="day-tip">Vestover fra Szeged, sørover langs Donau til Mohács. Historisk slagfelt 1526, fin elveby. Jevnt og flatt langs elvebredden hele veien.</p>
+      <button class="toggle-btn">Høydepunkter og midtstopp</button>
+    </div>
+  </div>
+  <div class="day-details">
+    <div class="details-grid">
+      <div class="detail-box">
+        <div class="detail-box-title">Høydepunkter</div>
+        <ul class="highlight-list">
+          <li>Donau sørover fra Baja — bred og mektig, rett sørover mot Balkan</li>
+          <li>Mohács-slagfeltet (1526) — der Ungarn tapte mot osmanerne, historisk minnested</li>
+          <li>Mohács karneval-tradisjonen — busójárás, en av Europas rareste festivaler</li>
+          <li>Donau-promenaden i Mohács — fin kveldstur langs elven</li>
+        </ul>
+      </div>
+      <div class="detail-box">
+        <div class="detail-box-title">Praktisk</div>
+        <ul class="highlight-list">
+          <li>Relativ lett dag — nyt tempoet etter gårsdagens omvei</li>
+          <li>Baja (~km 75): god lunsjby med supermarked og restauranter</li>
+          <li>Mohács: siste ungarsk overnatting — veksle HUF du ikke trenger</li>
+          <li>Kroatia bruker euro siden 2023 — ingen valutabytte ved grensen</li>
+        </ul>
+      </div>
+    </div>
+    <div class="midway-box">
+      <div class="midway-pin">📍</div>
+      <div>
+        <div class="midway-label">Anbefalt midtstopp</div>
+        <div class="midway-name">Baja</div>
+        <div class="midway-desc">Sjarmerende donauby kjent for halászlé (fiskesuppe — Ungarns beste versjon finnes her). Stopp ved Sugovica-kanalen og den fine gamle bykjernen. Supermarked og kaffemuligheter.</div>
+        <span class="midway-km">~km 75</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-head">
+  <span class="section-flag">🇭🇷🇧🇦</span>
+  <span class="section-title">Slavonsk slette og bosnisk fjell</span>
+  <div class="section-line"></div>
+</div>
+
+<div class="day-card" id="d6">
+  <div class="day-header" onclick="toggle('d6')">
+    <div class="day-date"><div class="dd">25</div><div class="mo">jul</div></div>
+    <div class="day-body">
+      <div class="day-top">
+        <div class="day-stage">Mohács → Osijek</div>
+        <div class="day-meta">
+          <span class="chip c-km">100 km</span><span class="chip c-hm">↑ 150 m</span><span class="chip c-time">⏱ 4t 00m</span><span class="chip c-flat">flatt</span><span class="chip c-stars">⭐⭐</span>
+        </div>
+      </div>
+      <p class="day-tip">Grensen ved Udvar–Kneževo inn i Kroatia. Sykkelsti langs Drava-elven inn mot Osijek. Tvrđa-festningen er obligatorisk kveldstur.</p>
+      <button class="toggle-btn">Høydepunkter og midtstopp</button>
+    </div>
+  </div>
+  <div class="day-details">
+    <div class="details-grid">
+      <div class="detail-box">
+        <div class="detail-box-title">Høydepunkter</div>
+        <ul class="highlight-list">
+          <li>Grense HU → HR — Kroatia i Schengen siden 2023, normalt raskt</li>
+          <li>Drava-elven — rolig sykkelsti langs elvebredden inn mot Osijek</li>
+          <li>Tvrđa-festningen — barokkfestning fra 1700-tallet, nå restaurant- og bardistrikt</li>
+          <li>Osijek kveldsmat — slavonsk mat er undervurdert, prøv čobanac (herdemengryte)</li>
+        </ul>
+      </div>
+      <div class="detail-box">
+        <div class="detail-box-title">Praktisk</div>
+        <ul class="highlight-list">
+          <li>Kort dag med vilje — Bosnia starter hardt neste dag</li>
+          <li>Bruk ettermiddagen til å utforske Osijek og spise godt</li>
+          <li>Ta ut bosnisk mark (BAM) i Osijek — Bosnia er kontantbasert</li>
+          <li>Sjekk at sykkel og utstyr er i orden før Bosnia</li>
+        </ul>
+      </div>
+    </div>
+    <div class="midway-box">
+      <div class="midway-pin">📍</div>
+      <div>
+        <div class="midway-label">Anbefalt midtstopp</div>
+        <div class="midway-name">Beli Manastir</div>
+        <div class="midway-desc">Første kroatiske by etter grensen. Liten og rolig, men kafé og supermarked finnes. God pause etter grensepasseringen og påfyll av vann og mat før Osijek.</div>
+        <span class="midway-km">~km 50</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="day-card" id="d7">
+  <div class="day-header" onclick="toggle('d7')">
+    <div class="day-date"><div class="dd">26</div><div class="mo">jul</div></div>
+    <div class="day-body">
+      <div class="day-top">
+        <div class="day-stage">Osijek → Doboj</div>
+        <div class="day-meta">
+          <span class="chip c-km">155 km</span><span class="chip c-hm">↑ 900 m</span><span class="chip c-time">⏱ 6t 12m</span><span class="chip c-mountain">fjell start</span><span class="chip c-stars">⭐⭐⭐</span>
+        </div>
+      </div>
+      <p class="day-tip">Via Šamac-grensen inn i Bosnia. Bosna-elven (M17) sørover — elvedalsykling med gradvis stigende terreng.</p>
+      <button class="toggle-btn">Høydepunkter og midtstopp</button>
+    </div>
+  </div>
+  <div class="day-details">
+    <div class="details-grid">
+      <div class="detail-box">
+        <div class="detail-box-title">Høydepunkter</div>
+        <ul class="highlight-list">
+          <li>Grense HR → BA — Bosnia ikke Schengen, pass + stempel obligatorisk</li>
+          <li>Šamac — grenseby ved Sava-elven, inngang til Bosnia og Hercegovina</li>
+          <li>Bosna-elven (M17) — elvedalsykling sørover med gradvis stigende terreng</li>
+          <li>Bosnisk mat i Doboj — første ekte ćevapi og burek, mye billigere enn Kroatia</li>
+          <li>Doboj-borgen (Gradina) — middelalderborg over byen, fin kveldstur</li>
+        </ul>
+      </div>
+      <div class="detail-box">
+        <div class="detail-box-title">Praktisk</div>
+        <ul class="highlight-list">
+          <li>Lang dag — start tidlig, senest 07:00</li>
+          <li>Kontanter i BAM — minibank i Šamac eller Modriča</li>
+          <li>Bosnia er billig — spis og drikk godt, du trenger det</li>
+          <li>Doboj: hviledøgn neste dag, slapp av og spis godt</li>
+        </ul>
+      </div>
+    </div>
+    <div class="midway-box">
+      <div class="midway-pin">📍</div>
+      <div>
+        <div class="midway-label">Anbefalt midtstopp</div>
+        <div class="midway-name">Modriča</div>
+        <div class="midway-desc">Liten bosnisk by ved Bosna-elven, halvveis mellom grensen og Doboj. Kafé og grillmat tilgjengelig. God pause ved elvebredden før de siste 60 km inn til Doboj.</div>
+        <span class="midway-km">~km 90</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="rest-card">
+  <div class="rest-date"><div class="dd">27</div><div class="mo">jul</div></div>
+  <div class="rest-body"><div class="rest-icon">🛌</div><div><div class="rest-title">Hviledøgn — Doboj</div><div class="rest-sub">Ćevapi, burek, begova čorba, Doboj-borgen, vaske klær</div></div></div>
+</div>
+
+<div class="day-card" id="d8">
+  <div class="day-header" onclick="toggle('d8')">
+    <div class="day-date"><div class="dd">28</div><div class="mo">jul</div></div>
+    <div class="day-body">
+      <div class="day-top">
+        <div class="day-stage">Doboj → Prijedor</div>
+        <div class="day-meta">
+          <span class="chip c-km">130 km</span><span class="chip c-hm">↑ 1 000 m</span><span class="chip c-time">⏱ 5t 12m</span><span class="chip c-mountain">fjell</span><span class="chip c-stars">⭐⭐⭐⭐</span>
+        </div>
+      </div>
+      <p class="day-tip">M4/E661 langs Vrbas-elvedalen via Banja Luka — turkisgrønn elv, klippevegger, rafting-landskap. En av Balkans råeste sykkelstrekninger.</p>
+      <button class="toggle-btn">Høydepunkter og midtstopp</button>
+    </div>
+  </div>
+  <div class="day-details">
+    <div class="details-grid">
+      <div class="detail-box">
+        <div class="detail-box-title">Høydepunkter</div>
+        <ul class="highlight-list">
+          <li>Vrbas-elvedalen — turkisgrønn elv, klippevegger og raftingcamper hele veien</li>
+          <li>Banja Luka — Republika Srpskas største by, Kastel-festningen ved elven</li>
+          <li>Ferstina-fossefall i Banja Luka sentrum — uvanlig for en storby</li>
+          <li>Krupa na Vrbasu — dramatisk juv der Vrbas skjærer gjennom kalkstein</li>
+        </ul>
+      </div>
+      <div class="detail-box">
+        <div class="detail-box-title">Praktisk</div>
+        <ul class="highlight-list">
+          <li>Hold M4/E661 langs elvedalen — ikke ta snarveier over åskammene</li>
+          <li>Banja Luka har Lidl og supermarkeder — fyll opp mat og vann her</li>
+          <li>1 000 hm er mange små opp-og-ned langs elven, ikke én stor stigning</li>
+          <li>Prijedor: enkel overnatting, tidlig i seng</li>
+        </ul>
+      </div>
+    </div>
+    <div class="midway-box">
+      <div class="midway-pin">📍</div>
+      <div>
+        <div class="midway-label">Anbefalt midtstopp</div>
+        <div class="midway-name">Banja Luka — Kastel-festningen</div>
+        <div class="midway-desc">Lunsj ved Kastel-festningen og Vrbas-elven. Ćevapi ved elvebredden er et must. Fyll opp i Lidl like ved sentrum. Nyt utsikten over den turkise Vrbas fra festningsmurene.</div>
+        <span class="midway-km">~km 100</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="day-card" id="d9">
+  <div class="day-header" onclick="toggle('d9')">
+    <div class="day-date"><div class="dd">29</div><div class="mo">jul</div></div>
+    <div class="day-body">
+      <div class="day-top">
+        <div class="day-stage">Prijedor → Bihać</div>
+        <div class="day-meta">
+          <span class="chip c-km">130 km</span><span class="chip c-hm">↑ 1 050 m</span><span class="chip c-time">⏱ 5t 12m</span><span class="chip c-mountain">fjell</span><span class="chip c-stars">⭐⭐⭐⭐</span>
+        </div>
+      </div>
+      <p class="day-tip">Una-dalen — turens råeste etappe. Turkisgrønn Una-elv, klippevegger, stryk og fossefall gjennom Una nasjonalpark.</p>
+      <button class="toggle-btn">Høydepunkter og midtstopp</button>
+    </div>
+  </div>
+  <div class="day-details">
+    <div class="details-grid">
+      <div class="detail-box">
+        <div class="detail-box-title">Høydepunkter</div>
+        <ul class="highlight-list">
+          <li>Una-elven — en av Europas reneste elver, smaragdgrønn og dramatisk</li>
+          <li>Una nasjonalpark — fossefall, stryk og klippevegger langs hele ruten</li>
+          <li>Bosanska Krupa — gammelt tårn over elven, pittoresk elvecrossing</li>
+          <li>Martin Brod-fossefallet — spektakulært cascade-fossefall i nasjonalparken</li>
+          <li>Bihać gamlebyen — ottomansk tårn og fin kveldsatmosfære ved elven</li>
+        </ul>
+      </div>
+      <div class="detail-box">
+        <div class="detail-box-title">Praktisk</div>
+        <ul class="highlight-list">
+          <li>Turens råeste etappe — ta deg tid, dette er grunnen til at du er her</li>
+          <li>Lite matmuligheter i nasjonalparken — ta med nok fra Prijedor</li>
+          <li>Bosanska Krupa (~km 50) — siste skikkelige handlested</li>
+          <li>Bihać: god mat og kaffe, kroatisk grense neste dag</li>
+        </ul>
+      </div>
+    </div>
+    <div class="midway-box">
+      <div class="midway-pin">📍</div>
+      <div>
+        <div class="midway-label">Anbefalt midtstopp</div>
+        <div class="midway-name">Bosanska Krupa</div>
+        <div class="midway-desc">Sjarmerende elveby der Una-dalen åpner seg. Gammelt ottomansk tårn på klippen over elven. Kafé og matmuligheter — siste skikkelige stopp før Una nasjonalpark tar over. Bassengene ved elven er fristende å hoppe i.</div>
+        <span class="midway-km">~km 50</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-head">
+  <span class="section-flag">🇭🇷</span>
+  <span class="section-title">Lika, kyst og Kvarner</span>
+  <div class="section-line"></div>
+</div>
+
+<div class="day-card" id="d10">
+  <div class="day-header" onclick="toggle('d10')">
+    <div class="day-date"><div class="dd">30</div><div class="mo">jul</div></div>
+    <div class="day-body">
+      <div class="day-top">
+        <div class="day-stage">Bihać → Plitvice → Senj</div>
+        <div class="day-meta">
+          <span class="chip c-km">130 km</span><span class="chip c-hm">↑ 1 150 m</span><span class="chip c-time">⏱ 5t 12m</span><span class="chip c-mountain">fjell</span><span class="chip c-stars">⭐⭐⭐⭐</span>
+        </div>
+      </div>
+      <p class="day-tip">Plitvice (UNESCO, stopp 1–2 t). Ned Lika-platået — 600 hm nedstigning mot Adriaterhavet. Panorama over Kvarner-bukta ved Senj.</p>
+      <button class="toggle-btn">Høydepunkter og midtstopp</button>
+    </div>
+  </div>
+  <div class="day-details">
+    <div class="details-grid">
+      <div class="detail-box">
+        <div class="detail-box-title">Høydepunkter</div>
+        <ul class="highlight-list">
+          <li>Grense BA → HR — pass + stempel ut av Bosnia</li>
+          <li>Plitvice Lakes (UNESCO) — 16 turkise innsjøer og 90+ fossefall, åpner 07:00</li>
+          <li>Lika-platået — øde, dramatisk høyfjellslandskap på 600 m høyde</li>
+          <li>Nedstigningen mot Senj — 600 hm på 30 km med panorama over Adriaterhavet</li>
+          <li>Første glimt av Adriaterhavet — etter dager i Balkan-fjellene er dette magisk</li>
+        </ul>
+      </div>
+      <div class="detail-box">
+        <div class="detail-box-title">Praktisk</div>
+        <ul class="highlight-list">
+          <li>Plitvice: book billett online (plitvicejezera.hr) — dyrt i kassen</li>
+          <li>Ankomst Plitvice tidlig (~07:00) for å unngå turistmassene</li>
+          <li>Senj har lite overnatting — book på forhånd i juli</li>
+          <li>Nedstigningen mot Senj er bratt — bremser varmes opp</li>
+        </ul>
+      </div>
+    </div>
+    <div class="midway-box">
+      <div class="midway-pin">📍</div>
+      <div>
+        <div class="midway-label">Anbefalt midtstopp</div>
+        <div class="midway-name">Plitvička Jezera — inngang 1</div>
+        <div class="midway-desc">2 timer i nasjonalparken er nok til å se det beste — Veliki Slap (Kroatias høyeste foss) og de øverste innsjøene. Lunsj ved inngang 1 etterpå. Obligatorisk stopp — dette er en av Europas vakreste plasser.</div>
+        <span class="midway-km">~km 55</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="day-card" id="d11">
+  <div class="day-header" onclick="toggle('d11')">
+    <div class="day-date"><div class="dd">31</div><div class="mo">jul</div></div>
+    <div class="day-body">
+      <div class="day-top">
+        <div class="day-stage">Senj → Krk → Baška og tilbake</div>
+        <div class="day-meta">
+          <span class="chip c-km">120 km</span><span class="chip c-hm">↑ 700 m</span><span class="chip c-time">⏱ 4t 48m</span><span class="chip c-coast">kyst</span><span class="chip c-stars">⭐⭐⭐</span>
+        </div>
+      </div>
+      <p class="day-tip">Magistrala nordover, Krk-broen (gratis for syklister), sørover øya til Baška. Runde tilbake til Krk by langs østkysten.</p>
+      <button class="toggle-btn">Høydepunkter og midtstopp</button>
+    </div>
+  </div>
+  <div class="day-details">
+    <div class="details-grid">
+      <div class="detail-box">
+        <div class="detail-box-title">Høydepunkter</div>
+        <ul class="highlight-list">
+          <li>Jadranska magistrala — kystveien med Adriaterhavet på høyre side hele veien</li>
+          <li>Krk-broen — en av Europas lengste betongbuer, gratis for syklister</li>
+          <li>Krk by — venetiansk middelaldersentrum med katedral og gammel bymur</li>
+          <li>Baška-stranden — en av Kroatias vakreste grusstrander, turkisblått vann</li>
+          <li>Baška-dalen — dramatisk og øde landskap på vei ned til stranden</li>
+        </ul>
+      </div>
+      <div class="detail-box">
+        <div class="detail-box-title">Praktisk</div>
+        <ul class="highlight-list">
+          <li>Baška er 30 km sørvest for Krk by — kupert men absolutt verdt det</li>
+          <li>Juli er høysesong — book overnatting i Krk by på forhånd</li>
+          <li>Baška: hopp i sjøen, spis grillet fisk, ta deg god tid</li>
+          <li>Retur langs østkysten er vakkert men kupert</li>
+        </ul>
+      </div>
+    </div>
+    <div class="midway-box">
+      <div class="midway-pin">📍</div>
+      <div>
+        <div class="midway-label">Anbefalt midtstopp</div>
+        <div class="midway-name">Baška</div>
+        <div class="midway-desc">Det er hit du er på vei! 1,8 km lang grusbukt omgitt av dramatiske klippetinder. Hopp i sjøen, spis grillet riba (fisk) på en av restaurantene langs strandpromenaden. Absolutt fortjent etter Bosnia-fjellene!</div>
+        <span class="midway-km">~km 70</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="rest-card">
+  <div class="rest-date"><div class="dd">1</div><div class="mo">aug</div></div>
+  <div class="rest-body"><div class="rest-icon">🏖️</div><div><div class="rest-title">Hviledøgn — Krk</div><div class="rest-sub">Strand, grillet fisk, lokale viner — fortjent hvile!</div></div></div>
+</div>
+
+<div class="section-head">
+  <span class="section-flag">🇭🇷🇮🇹🇸🇮</span>
+  <span class="section-title">Istria, Friuli og Soča heim</span>
+  <div class="section-line"></div>
+</div>
+
+<div class="day-card" id="d12">
+  <div class="day-header" onclick="toggle('d12')">
+    <div class="day-date"><div class="dd">2</div><div class="mo">aug</div></div>
+    <div class="day-body">
+      <div class="day-top">
+        <div class="day-stage">Krk → Poreč</div>
+        <div class="day-meta">
+          <span class="chip c-km">130 km</span><span class="chip c-hm">↑ 600 m</span><span class="chip c-time">⏱ 5t 12m</span><span class="chip c-coast">kyst</span><span class="chip c-stars">⭐⭐⭐</span>
+        </div>
+      </div>
+      <p class="day-tip">Over Krk-broen, sørover Istrias vestkyst. Parenzana-stien (bilfri gammel jernbanetrasé) fra Novigrad til Poreč. Eufrasius-basilikaen (UNESCO).</p>
+      <button class="toggle-btn">Høydepunkter og midtstopp</button>
+    </div>
+  </div>
+  <div class="day-details">
+    <div class="details-grid">
+      <div class="detail-box">
+        <div class="detail-box-title">Høydepunkter</div>
+        <ul class="highlight-list">
+          <li>Istrias vestkyst — mildere og grønnere enn dalmatinsk kyst, venetiansk kulturarv</li>
+          <li>Parenzana-stien — gammel jernbanetrasé fra 1902, nå bilfri grusvei gjennom vinmarker</li>
+          <li>Novigrad — liten venetiansk kystby med fin middelalderkirke og havnerestauranter</li>
+          <li>Poreč Eufrasius-basilikaen (UNESCO) — 6. århundre mosaikksmykker, unik i verden</li>
+        </ul>
+      </div>
+      <div class="detail-box">
+        <div class="detail-box-title">Praktisk</div>
+        <ul class="highlight-list">
+          <li>Parenzana er grus — bredere dekk takler det fint, kan unngås på asfalt</li>
+          <li>Novigrad er et fint lunsjsted med havnerestauranter</li>
+          <li>Poreč: book overnatting på forhånd, høysesong august</li>
+          <li>Eufrasius-basilikaen er åpen til 20:00 — besøk etter innsjekk</li>
+        </ul>
+      </div>
+    </div>
+    <div class="midway-box">
+      <div class="midway-pin">📍</div>
+      <div>
+        <div class="midway-label">Anbefalt midtstopp</div>
+        <div class="midway-name">Novigrad</div>
+        <div class="midway-desc">Sjarmerende venetiansk by der Parenzana møter kysten. Lunsj ved havnen — istrisk trøffel, pasta og lokale viner er spesialiteten her. En av Istriahalvøyens best bevarte små byer.</div>
+        <span class="midway-km">~km 70</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="day-card" id="d13">
+  <div class="day-header" onclick="toggle('d13')">
+    <div class="day-date"><div class="dd">3</div><div class="mo">aug</div></div>
+    <div class="day-body">
+      <div class="day-top">
+        <div class="day-stage">Poreč → Trieste → Udine</div>
+        <div class="day-meta">
+          <span class="chip c-km">155 km</span><span class="chip c-hm">↑ 550 m</span><span class="chip c-time">⏱ 6t 12m</span><span class="chip c-coast">kyst/flat</span><span class="chip c-new">🇮🇹 IT ★</span><span class="chip c-stars">⭐⭐⭐</span>
+        </div>
+      </div>
+      <p class="day-tip">Parenzana nordover via Umag, Piran, inn i Trieste (kaffestopp Piazza Unità d'Italia). Nordøstover langs kystveien og inn i Friuli til Udine.</p>
+      <button class="toggle-btn">Høydepunkter og midtstopp</button>
+    </div>
+  </div>
+  <div class="day-details">
+    <div class="details-grid">
+      <div class="detail-box">
+        <div class="detail-box-title">Høydepunkter</div>
+        <ul class="highlight-list">
+          <li>Piran — den vakreste venetianske byen i Slovenia, Tartini-plassen</li>
+          <li>Trieste — Habsburg-elegant havneby, Piazza Unità d'Italia mot Adriaterhavet</li>
+          <li>Trieste kaffekulturen — Italias kaffehovedstad, verdens beste espresso</li>
+          <li>Miramare-slottet — hvitt slott over Adriaterhavet like nord for Trieste</li>
+          <li>Udine — kompakt friuliansk by med loggiato og venetiansk preg</li>
+        </ul>
+      </div>
+      <div class="detail-box">
+        <div class="detail-box-title">Praktisk</div>
+        <ul class="highlight-list">
+          <li>Piran: 30 min vandring i gamlebyen — absolutt verdt det</li>
+          <li>Trieste: kaffestopp på Caffè degli Specchi (Piazza Unità) — ikonisk</li>
+          <li>Grense SI → IT er Schengen — ingen stopp</li>
+          <li>Udine: siste kveld i Italia — prøv frico (friuliansk potet-ost-rett)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="midway-box">
+      <div class="midway-pin">📍</div>
+      <div>
+        <div class="midway-label">Anbefalt midtstopp</div>
+        <div class="midway-name">Trieste — Piazza Unità d'Italia</div>
+        <div class="midway-desc">Espresso på Caffè degli Specchi — sett deg ned, se ut over Adriaterhavet og nyt at du faktisk er her på sykkel fra Wien. Miramare-slottet er 7 km nord og verdt en liten omvei. Italia i boks!</div>
+        <span class="midway-km">~km 90</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="day-card" id="d14">
+  <div class="day-header" onclick="toggle('d14')">
+    <div class="day-date"><div class="dd">4</div><div class="mo">aug</div></div>
+    <div class="day-body">
+      <div class="day-top">
+        <div class="day-stage">Udine → Soča-dalen → Ljubljana</div>
+        <div class="day-meta">
+          <span class="chip c-km">160 km</span><span class="chip c-hm">↑ 1 100 m</span><span class="chip c-time">⏱ 6t 24m</span><span class="chip c-mountain">fjell</span><span class="chip c-stars">⭐⭐⭐⭐</span>
+        </div>
+      </div>
+      <p class="day-tip">Nordøst mot Cividale del Friuli, inn i Slovenia via Kobarid og Soča-dalen. Smaragdgrønn elv, WW1-historikk. Ned til Ljubljana — champagnen er klar.</p>
+      <button class="toggle-btn">Høydepunkter og midtstopp</button>
+    </div>
+  </div>
+  <div class="day-details">
+    <div class="details-grid">
+      <div class="detail-box">
+        <div class="detail-box-title">Høydepunkter</div>
+        <ul class="highlight-list">
+          <li>Cividale del Friuli — langobardisk UNESCO-by med dramatisk Natisone-juv</li>
+          <li>Soča-elven — smaragdgrønn og krystallklar, en av Europas vakreste elver</li>
+          <li>Kobarid — WW1 Isonzo-fronten, Kobarid-museet (Europas beste WW1-museum)</li>
+          <li>Soča-dalen sykling — blå-grønn elv, hvite klippevegger, alpint landskap</li>
+          <li>Ljubljana — Triple Bridge, Ljubljanica-elven, slottet på klippen</li>
+        </ul>
+      </div>
+      <div class="detail-box">
+        <div class="detail-box-title">Praktisk</div>
+        <ul class="highlight-list">
+          <li>Start 05:30–06:00 fra Udine — 160 km og 1 100 hm tar sin tid</li>
+          <li>Kobarid-museet: 30 min er nok for et raskt besøk, 1,5 t for fullt utbytte</li>
+          <li>Soča-dalen: lett å bruke for lang tid her — hold tempoet oppe</li>
+          <li>Ljubljana: feir med champagne ved Triple Bridge — 10 land, ~1 970 km!</li>
+        </ul>
+      </div>
+    </div>
+    <div class="midway-box">
+      <div class="midway-pin">📍</div>
+      <div>
+        <div class="midway-label">Anbefalt midtstopp</div>
+        <div class="midway-name">Kobarid</div>
+        <div class="midway-desc">Lunsj ved Soča-elven i Kobarid — Kotlar restaurant er tilgjengelig uten booking og serverer utmerket slovenisk mat. Stikk innom Kobarid-museet for 30 min. Selve Soča-elven like ved er nydelig å hvile ved.</div>
+        <span class="midway-km">~km 70</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="home-card">
+  <div class="home-date-block"><div class="dd">5</div><div class="mo">aug</div></div>
+  <div class="home-divider"></div>
+  <div class="home-text">
+    <div class="title">Hjemreise — Ljubljana → Wien (tog ~2t) → fly heim</div>
+    <div class="sub">Book via ÖBB · Husk sykkelreservasjon · God tur, dere klarte det!</div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  Wien → Balkan → Ljubljana 2025 &nbsp;·&nbsp; 10 land &nbsp;·&nbsp; ~1 970 km &nbsp;·&nbsp; 25 km/t snitt &nbsp;·&nbsp; Klikk på etappene for detaljer
+</footer>
+
+<script>
+  function toggle(id) {
+    document.getElementById(id).classList.toggle('open');
+  }
+</script>
+</body>
+</html>
